@@ -147,7 +147,7 @@ export function InvoicesPage({ invoices, onStatusChange }: InvoicesPageProps) {
                   <span className="font-mono text-sm font-bold text-accent2">{inv.doc_number}</span>
                   <div>
                     <p className="text-sm font-medium">{inv.customer?.name || 'Okänd kund'}</p>
-                    <p className="text-xs text-muted">{inv.date} &middot; Förfaller {inv.due_date}</p>
+                    <p className="text-xs text-muted">{inv.date} · Förfaller {inv.due_date}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-4">

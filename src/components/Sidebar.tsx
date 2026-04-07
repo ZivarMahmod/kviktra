@@ -7,11 +7,11 @@ interface SidebarProps {
 }
 
 const modules: { key: Module; label: string; icon: string }[] = [
-  { key: 'dashboard', label: 'Översikt', icon: '&#9632;' },
-  { key: 'customers', label: 'Kunder', icon: '&#128101;' },
-  { key: 'quotes', label: 'Offerter', icon: '&#128196;' },
-  { key: 'invoices', label: 'Fakturor', icon: '&#128179;' },
-  { key: 'jobs', label: 'Jobb', icon: '&#128295;' },
+  { key: 'dashboard', label: 'Översikt', icon: '\u25A0' },
+  { key: 'customers', label: 'Kunder', icon: '\u263A' },
+  { key: 'quotes', label: 'Offerter', icon: '\u2709' },
+  { key: 'invoices', label: 'Fakturor', icon: '\u2211' },
+  { key: 'jobs', label: 'Jobb', icon: '\u2692' },
 ];
 
 export function Sidebar({ active, onNavigate, counts }: SidebarProps) {
@@ -43,10 +43,7 @@ export function Sidebar({ active, onNavigate, counts }: SidebarProps) {
                 : 'text-muted hover:bg-surface2 hover:text-text'
             }`}
           >
-            <span
-              className="text-base w-5 text-center shrink-0"
-              dangerouslySetInnerHTML={{ __html: m.icon }}
-            />
+            <span className="text-base w-5 text-center shrink-0">{m.icon}</span>
             <span className="hidden lg:inline flex-1">{m.label}</span>
             {countMap[m.key] > 0 && (
               <span className="hidden lg:inline ml-auto rounded-full bg-surface2 px-1.5 py-0.5 text-[10px] font-bold text-muted">

@@ -137,8 +137,8 @@ export function JobsPage({ jobs, customers, onAdd, onStatusChange }: JobsPagePro
                   <div>
                     <p className="font-medium">{j.title}</p>
                     <p className="text-xs text-muted mt-0.5">
-                      {j.customer?.name || '—'} &middot; Start: {j.start_date}
-                      {j.end_date && ` &middot; Klar: ${j.end_date}`}
+                      {j.customer?.name || '—'} · Start: {j.start_date}
+                      {j.end_date && ` · Klar: ${j.end_date}`}
                     </p>
                     {j.description && <p className="text-sm text-muted mt-1">{j.description}</p>}
                     {j.quote_ref && <p className="text-xs text-accent mt-1">Offert: {j.quote_ref}</p>}

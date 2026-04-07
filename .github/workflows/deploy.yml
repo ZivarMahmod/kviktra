@@ -23,7 +23,7 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: npx vite build --base=/kviktra/
+      - run: npx vite build
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
