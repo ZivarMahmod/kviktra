@@ -16,8 +16,11 @@ export interface Customer {
   company_id?: string;
   name: string;
   email: string;
+  phone: string;
   address: string;
   pnr: string;
+  notes: string;
+  created_at?: string;
 }
 
 export interface LineItem {
@@ -71,7 +74,7 @@ export interface Invoice {
   payment_terms: string;
   rot_enabled: boolean;
   totals: Totals;
-  status: 'Utkast' | 'Skickad' | 'Betald' | 'Förfallen';
+  status: InvoiceStatus;
   paid_date: string | null;
   job_notes: string;
   bankgiro: string;
@@ -80,11 +83,29 @@ export interface Invoice {
   created_at?: string;
 }
 
+export type InvoiceStatus = 'Utkast' | 'Skickad' | 'Betald' | 'Förfallen';
+
+export interface Job {
+  id: string;
+  customer_id: string;
+  customer?: Customer;
+  company?: Company;
+  title: string;
+  description: string;
+  status: JobStatus;
+  quote_ref?: string;
+  invoice_ref?: string;
+  start_date: string;
+  end_date?: string;
+  created_at: string;
+}
+
+export type JobStatus = 'Planerad' | 'Pågår' | 'Klar' | 'Fakturerad';
+
 export interface Email {
   day: number;
   subject: string;
   body: string;
 }
 
-export type DocumentType = 'quote' | 'invoice';
-export type ActiveView = 'form' | 'document' | 'emails' | 'history';
+export type Module = 'dashboard' | 'customers' | 'quotes' | 'invoices' | 'jobs';

@@ -1,4 +1,6 @@
-import type { Quote, Invoice, DocumentType } from '../types';
+import type { Quote, Invoice } from '../types';
+
+type DocumentType = 'quote' | 'invoice';
 import { fmtSEK } from '../lib/calculations';
 
 interface DocumentViewProps {

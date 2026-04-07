@@ -1,118 +1,104 @@
 import { useState } from 'react';
-import type { Quote, Invoice, Email, ActiveView, DocumentType } from './types';
-import { Header } from './components/Header';
-import { QuoteForm } from './components/QuoteForm';
-import { DocumentView } from './components/DocumentView';
-import { EmailCards } from './components/EmailCards';
-import { HistoryList } from './components/HistoryList';
+import type { Quote, Invoice, Email, Module } from './types';
+import { Sidebar } from './components/Sidebar';
+import { Dashboard } from './components/Dashboard';
+import { CustomersPage } from './components/CustomersPage';
+import { QuotesPage } from './components/QuotesPage';
+import { InvoicesPage } from './components/InvoicesPage';
+import { JobsPage } from './components/JobsPage';
 import { useQuotes } from './hooks/useQuotes';
 import { useInvoices } from './hooks/useInvoices';
+import { useCustomers } from './hooks/useCustomers';
+import { useJobs } from './hooks/useJobs';
 
 function App() {
-  const [activeView, setActiveView] = useState<ActiveView>('form');
-  const [activeTab, setActiveTab] = useState<'document' | 'emails'>('document');
-  const [currentDoc, setCurrentDoc] = useState<Quote | Invoice | null>(null);
-  const [currentDocType, setCurrentDocType] = useState<DocumentType>('quote');
-  const [emails, setEmails] = useState<Email[]>([]);
-  const [emailsLoading, setEmailsLoading] = useState(false);
+  const [activeModule, setActiveModule] = useState<Module>('dashboard');
 
   const { quotes, addQuote, getQuoteCount } = useQuotes();
   const { invoices, createFromQuote, updateStatus } = useInvoices();
+  const { customers, addCustomer, updateCustomer, deleteCustomer } = useCustomers();
+  const { jobs, addJob, updateJobStatus } = useJobs();
 
-  const handleQuoteCreated = (quote: Quote, generatedEmails: Email[]) => {
+  const handleQuoteCreated = (quote: Quote, _emails: Email[]) => {
     addQuote(quote);
-    setCurrentDoc(quote);
-    setCurrentDocType('quote');
-    setActiveTab('document');
-    setEmails(generatedEmails);
-    setEmailsLoading(false);
+    // Auto-add customer if new
+    if (quote.customer && !customers.find((c) => c.email === quote.customer?.email && c.name === quote.customer?.name)) {
+      addCustomer({
+        name: quote.customer.name,
+        email: quote.customer.email,
+        phone: quote.customer.phone || '',
+        address: quote.customer.address,
+        pnr: quote.customer.pnr,
+        notes: '',
+      });
+    }
   };
 
-  const handleCreateInvoice = () => {
-    if (!currentDoc || currentDocType !== 'quote') return;
-    const invoice = createFromQuote(currentDoc as Quote);
-    setCurrentDoc(invoice);
-    setCurrentDocType('invoice');
-  };
-
-  const handleSelectHistoryItem = (item: Quote | Invoice, type: 'quote' | 'invoice') => {
-    setCurrentDoc(item);
-    setCurrentDocType(type);
-    setActiveView('form');
-    setActiveTab('document');
-  };
-
-  const handlePrint = () => {
-    window.print();
+  const handleCreateInvoice = (quote: Quote): Invoice => {
+    return createFromQuote(quote);
   };
 
   return (
-    <div className="min-h-screen bg-bg">
-      <Header activeView={activeView} onNavigate={setActiveView} />
+    <div className="flex h-screen bg-bg">
+      <Sidebar
+        active={activeModule}
+        onNavigate={setActiveModule}
+        counts={{
+          customers: customers.length,
+          quotes: quotes.length,
+          invoices: invoices.length,
+          jobs: jobs.length,
+        }}
+      />
 
-      {activeView === 'history' ? (
-        <main className="mx-auto max-w-4xl p-4">
-          <HistoryList
+      <main className="flex-1 overflow-y-auto">
+        {activeModule === 'dashboard' && (
+          <div className="p-4 lg:p-6">
+            <Dashboard
+              quotes={quotes}
+              invoices={invoices}
+              customers={customers}
+              jobs={jobs}
+              onNavigate={setActiveModule}
+            />
+          </div>
+        )}
+
+        {activeModule === 'customers' && (
+          <CustomersPage
+            customers={customers}
+            onAdd={addCustomer}
+            onUpdate={updateCustomer}
+            onDelete={deleteCustomer}
+          />
+        )}
+
+        {activeModule === 'quotes' && (
+          <QuotesPage
             quotes={quotes}
+            customers={customers}
+            quoteCount={getQuoteCount()}
+            onQuoteCreated={handleQuoteCreated}
+            onCreateInvoice={handleCreateInvoice}
+          />
+        )}
+
+        {activeModule === 'invoices' && (
+          <InvoicesPage
             invoices={invoices}
-            onSelect={handleSelectHistoryItem}
             onStatusChange={updateStatus}
           />
-        </main>
-      ) : (
-        <main className="mx-auto flex max-w-7xl flex-col lg:flex-row">
-          {/* Left panel — form */}
-          <aside className="no-print w-full shrink-0 overflow-y-auto border-r border-border lg:w-[420px] lg:h-[calc(100vh-57px)] lg:sticky lg:top-[57px]">
-            <QuoteForm
-              onQuoteCreated={handleQuoteCreated}
-              quoteCount={getQuoteCount()}
-            />
-          </aside>
+        )}
 
-          {/* Right panel — output */}
-          <section className="flex-1 p-4 lg:p-6">
-            {/* Tabs */}
-            <div className="no-print mb-4 flex gap-1 border-b border-border">
-              <button
-                onClick={() => setActiveTab('document')}
-                className={`px-4 py-2 text-sm font-medium transition-colors ${
-                  activeTab === 'document'
-                    ? 'border-b-2 border-accent text-accent'
-                    : 'text-muted hover:text-text'
-                }`}
-              >
-                Dokument
-              </button>
-              <button
-                onClick={() => setActiveTab('emails')}
-                className={`relative px-4 py-2 text-sm font-medium transition-colors ${
-                  activeTab === 'emails'
-                    ? 'border-b-2 border-accent text-accent'
-                    : 'text-muted hover:text-text'
-                }`}
-              >
-                Uppföljningsmejl
-                {emails.length > 0 && (
-                  <span className="ml-1.5 inline-flex h-4 w-4 items-center justify-center rounded-full bg-accent2 text-[10px] font-bold text-black">
-                    {emails.length}
-                  </span>
-                )}
-              </button>
-            </div>
-
-            {activeTab === 'document' ? (
-              <DocumentView
-                document={currentDoc}
-                type={currentDocType}
-                onCreateInvoice={currentDocType === 'quote' ? handleCreateInvoice : undefined}
-                onPrint={handlePrint}
-              />
-            ) : (
-              <EmailCards emails={emails} loading={emailsLoading} />
-            )}
-          </section>
-        </main>
-      )}
+        {activeModule === 'jobs' && (
+          <JobsPage
+            jobs={jobs}
+            customers={customers}
+            onAdd={addJob}
+            onStatusChange={updateJobStatus}
+          />
+        )}
+      </main>
     </div>
   );
 }
